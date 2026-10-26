@@ -27,7 +27,7 @@ from copilot.llm import LLMError, extract_json
 from copilot.report import fallback_narrative, render_postmortem, write_narrative
 from copilot.research import Reference, Researcher, ResearchError
 from copilot.taxonomy import EFFECT_TAXONOMY, taxonomy_text
-from copilot.workspace import TOOLS, Workspace
+from copilot.workspace import TOOLS, Evidence, Workspace
 
 _EFFECT_KEYS = {re.sub(r"[^a-z0-9]", "", label): label for label in EFFECT_TAXONOMY}
 
@@ -81,6 +81,21 @@ Rules:
 - effect must be one of the taxonomy labels, chosen by meaning. Use the label only, not its description.
 - Cite evidence IDs for every hop. Do not cite IDs that are not in the ledger.
 - more_evidence: at most three lookups that would materially change your answer. Leave it empty when you are confident or when told no further lookups are possible."""
+
+
+def triage_messages(brief: str, evidence: list[Evidence], calls_left: int,
+                    note: str = "") -> list[dict[str, str]]:
+    """The triage prompt. Training data is built with this same function, so
+    a fine-tuned triage model sees exactly what it will see in production."""
+    user = (
+        f"INCIDENT BRIEF\n{brief}\n\n"
+        f"EVIDENCE SO FAR\n{ledger_text(evidence)}\n\n"
+        f"Lookups left: {calls_left}."
+        + (f"\nYour last reply was not usable: {note}" if note else "")
+        + "\nWhat is the next lookup?"
+    )
+    return [{"role": "system", "content": TRIAGE_SYSTEM},
+            {"role": "user", "content": user}]
 
 
 class Investigator:
@@ -176,17 +191,9 @@ class Investigator:
         for _ in range(self.max_triage_steps):
             if self.ws.calls_left <= 0 or stumbles >= MAX_STUMBLES:
                 break
-            user = (
-                f"INCIDENT BRIEF\n{brief}\n\n"
-                f"EVIDENCE SO FAR\n{ledger_text(self.ws.evidence)}\n\n"
-                f"Lookups left: {self.ws.calls_left}."
-                + (f"\nYour last reply was not usable: {note}" if note else "")
-                + "\nWhat is the next lookup?"
-            )
             reply = await self.llm.chat(
                 ROLE_TRIAGE,
-                [{"role": "system", "content": TRIAGE_SYSTEM},
-                 {"role": "user", "content": user}],
+                triage_messages(brief, self.ws.evidence, self.ws.calls_left, note),
                 max_tokens=1500,
             )
             yield {"type": "usage", **self.llm.meter.snapshot()}
