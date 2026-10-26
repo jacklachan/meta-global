@@ -123,7 +123,7 @@ Times are IST. College runs 9–5, so weekday evenings give about 4 hours, and S
 - [ ] Official Rules: is building on PostmortemEnv / Hindsight allowed with disclosure? Solo or team? (Guide pasted so far stops at section 2.)
 - [x] Muse Spark pricing: $1.25 / $4.25 per 1M (standard), $0.10 / $0.20 (contributor; data used by Meta). Rate limits still unknown.
 - [x] Open weights allowed: Muse Glimmer and Muse Spark Open only.
-- [ ] Muse Glimmer: HF repo ID, license gate, TRL support.
+- [x] Muse Glimmer: `meta-models/Muse-Glimmer-30B`, Apache 2.0, not gated, BF16 ~60 GB. Supported in transformers 5.20.2, TRL 1.16.0 and vLLM 0.32.0 (with LoRA). `training/sft.py` passed a CPU smoke run on TRL's tiny Glimmer (Oct 26). Model card: not intended for users under 18.
 - [ ] Modal GPU prices; is $100 enough for Glimmer QLoRA?
 - [ ] Is the Model API open to developers in India? (A third-party guide said US-only preview; the hackathon presumably grants access.)
 - [ ] Oct exam dates (there's an RVCE Oct exam config on your desktop). If any fall this week, shift the schedule.

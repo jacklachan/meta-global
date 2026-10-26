@@ -1,0 +1,9 @@
+# Local tools for training/: the CPU smoke test of sft.py and the Modal CLI.
+# The GPU images in modal_train.py / modal_serve.py pin their own packages.
+transformers==5.20.2
+trl==1.16.0
+peft==0.21.2
+datasets==5.1.0
+modal==1.6.2
+# torch: CPU build is enough for the smoke test
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
