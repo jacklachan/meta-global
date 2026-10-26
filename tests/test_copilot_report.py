@@ -18,7 +18,7 @@ class Writer:
 
     async def chat(self, role, messages, max_tokens=1024, temperature=0.2):
         if self.fail and role == ROLE_WRITER:
-            raise LLMError("Token Factory 503: overloaded", status=503)
+            raise LLMError("Model API 503: overloaded", status=503)
         self.prompts.append((role, messages[-1]["content"]))
         text = self.reply if isinstance(self.reply, str) else json.dumps(self.reply)
         result = ChatResult(text=text, role=role, model=f"fake-{role}", input_tokens=50,

@@ -33,7 +33,7 @@ def _reply(scenario):
 
 @pytest.fixture
 def client(monkeypatch):
-    monkeypatch.setenv("NEBIUS_API_KEY", "test-key")
+    monkeypatch.setenv("MODEL_API_KEY", "test-key")
     monkeypatch.delenv("TAVILY_API_KEY", raising=False)
     monkeypatch.setattr(api, "make_llm", lambda: Model(_reply(generate_scenario(42, "easy"))))
     monkeypatch.setattr(api, "store", api._Store())
@@ -118,10 +118,10 @@ def test_bad_requests_are_rejected_with_a_reason(client, body, fragment):
 
 
 def test_start_without_server_key_is_refused(client, monkeypatch):
-    monkeypatch.delenv("NEBIUS_API_KEY")
+    monkeypatch.delenv("MODEL_API_KEY")
     resp = client.post("/api/copilot/investigations", json={"source": "seed"})
     assert resp.status_code == 503
-    assert "NEBIUS_API_KEY" in resp.json()["detail"]
+    assert "MODEL_API_KEY" in resp.json()["detail"]
     assert client.get("/api/copilot/status").json()["ready"] is False
 
 
@@ -166,6 +166,7 @@ def test_product_ui_is_served_at_root_and_lab_keeps_the_old_console(client):
 
 def test_bundle_format_example_is_a_valid_bundle(client):
     import re
+
     from copilot import incidents
     from copilot.workspace import Workspace
 

@@ -73,13 +73,13 @@ def test_load_dotenv_does_not_override_real_environment(tmp_path, monkeypatch):
 
 
 def test_cli_without_key_reports_the_problem_and_fails(monkeypatch, tmp_path, capsys):
-    monkeypatch.delenv("NEBIUS_API_KEY", raising=False)
+    monkeypatch.delenv("MODEL_API_KEY", raising=False)
     monkeypatch.chdir(tmp_path)
 
     code = main(["investigate", "--seed", "1"])
 
     assert code == 1
-    assert "NEBIUS_API_KEY" in capsys.readouterr().err
+    assert "MODEL_API_KEY" in capsys.readouterr().err
 
 
 def test_cli_reports_unknown_task(monkeypatch, tmp_path, capsys):

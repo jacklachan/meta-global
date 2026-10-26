@@ -214,11 +214,11 @@ def test_unparseable_diagnosis_yields_an_empty_one_not_a_crash():
 
 
 def test_llm_failure_becomes_an_error_event():
-    model = ScriptedModel(fail_with=LLMError("Token Factory 401: bad key", status=401))
+    model = ScriptedModel(fail_with=LLMError("Model API 401: bad key", status=401))
 
     events = _run(Investigator(Workspace(_scenario()), model))
 
-    assert events[-1] == {"type": "error", "message": "Token Factory 401: bad key",
+    assert events[-1] == {"type": "error", "message": "Model API 401: bad key",
                           "status": 401}
 
 

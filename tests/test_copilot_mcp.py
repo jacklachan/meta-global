@@ -18,14 +18,14 @@ START, END = "2026-10-01T10:00:00Z", "2026-10-01T10:20:00Z"
 
 class Model:
     """Answers correctly for generated seed 5 (easy) and for bundles that
-    contain commit-abc; ``broken`` simulates Token Factory being down."""
+    contain commit-abc; ``broken`` simulates Model API being down."""
 
     def __init__(self, broken=False):
         self.meter, self.broken = UsageMeter(), broken
 
     async def chat(self, role, messages, max_tokens=1024, temperature=0.2):
         if self.broken:
-            raise LLMError("Token Factory 503: overloaded", status=503)
+            raise LLMError("Model API 503: overloaded", status=503)
         prompt = messages[-1]["content"]
         if "seed_5_easy" in prompt:
             causes = incidents.from_seed(5, "easy")["ground_truth"]["cause"].split("+")

@@ -33,7 +33,7 @@ from pydantic import BaseModel
 from copilot import incidents
 from copilot.config import ROLES, load_dotenv, load_settings
 from copilot.investigator import Investigator
-from copilot.llm import TokenFactoryClient
+from copilot.llm import ChatClient
 from copilot.oracle import Oracle
 from copilot.research import Researcher, TavilyClient
 from copilot.workspace import Workspace
@@ -138,9 +138,9 @@ store = _Store()
 store.load_recordings()
 
 
-def make_llm() -> TokenFactoryClient:
+def make_llm() -> ChatClient:
     """Seam for tests: swap this to drive the API with a scripted model."""
-    return TokenFactoryClient()
+    return ChatClient()
 
 
 def make_researcher(llm: Any) -> Researcher | None:
@@ -155,7 +155,7 @@ class StartBody(BaseModel):
     difficulty: str = "easy"
     bundle: dict[str, Any] | None = None
     # "oracle" replays the reference answer: no model, no key, no spend.
-    investigator: Literal["nemotron", "oracle"] = "nemotron"
+    investigator: Literal["model", "oracle"] = "model"
 
 
 def _scenario_for(body: StartBody) -> tuple[dict[str, Any], str]:
@@ -278,7 +278,7 @@ async def start(body: StartBody) -> dict[str, str]:
         return {"id": inv.id}
     if not load_settings().api_key:
         raise HTTPException(
-            503, "This server has no NEBIUS_API_KEY, so it cannot run new "
+            503, "This server has no MODEL_API_KEY, so it cannot run new "
                  "investigations. Recorded investigations still open.")
     scenario, title = _scenario_for(body)
     store.admit()

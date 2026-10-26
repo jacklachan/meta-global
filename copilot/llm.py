@@ -1,6 +1,6 @@
-"""Nebius Token Factory client.
+"""Chat-completions client for Meta Model API (and any OpenAI-compatible server).
 
-Token Factory speaks the OpenAI chat-completions protocol, so this is a thin
+Model API speaks the OpenAI chat-completions protocol, so this is a thin
 async wrapper that adds the three things the copilot needs: routing a call to
 the model configured for a role, retrying transient failures, and accounting
 for tokens and cost per role.
@@ -32,7 +32,7 @@ def strip_reasoning(text: str) -> str:
 
 
 class LLMError(Exception):
-    """A Token Factory call failed in a way the caller should surface."""
+    """A model call failed in a way the caller should surface."""
 
     def __init__(self, message: str, status: int | None = None) -> None:
         super().__init__(message)
@@ -78,7 +78,7 @@ class UsageMeter:
         }
 
 
-class TokenFactoryClient:
+class ChatClient:
     def __init__(
         self,
         settings: Settings | None = None,
@@ -98,10 +98,11 @@ class TokenFactoryClient:
         temperature: float = 0.2,
     ) -> ChatResult:
         """Run one chat completion on the model configured for ``role``."""
-        if not self.settings.api_key:
+        base_url, api_key = self.settings.endpoint_for(role)
+        if not api_key:
             raise LLMError(
-                "NEBIUS_API_KEY is not set. Create a key at "
-                "tokenfactory.nebius.com and export it.",
+                "MODEL_API_KEY is not set. Create a key at "
+                "dev.meta.ai and export it.",
                 status=401,
             )
         model = self.settings.model_for(role)
@@ -112,12 +113,12 @@ class TokenFactoryClient:
             "temperature": temperature,
         }
         started = time.monotonic()
-        data = await self._post("/chat/completions", payload)
+        data = await self._request("POST", "/chat/completions", payload, base_url, api_key)
         latency = time.monotonic() - started
 
         choices = data.get("choices") or []
         if not choices or "message" not in choices[0]:
-            raise LLMError(f"Token Factory returned no choices: {json.dumps(data)[:300]}")
+            raise LLMError(f"Model API returned no choices: {json.dumps(data)[:300]}")
         message = choices[0]["message"]
         text = strip_reasoning(message.get("content") or "")
         if not text:
@@ -148,14 +149,12 @@ class TokenFactoryClient:
         data = await self._request("GET", "/models")
         return [m.get("id", "") for m in data.get("data", [])]
 
-    async def _post(self, path: str, payload: dict[str, Any]) -> dict[str, Any]:
-        return await self._request("POST", path, payload)
-
     async def _request(
-        self, method: str, path: str, payload: dict[str, Any] | None = None
+        self, method: str, path: str, payload: dict[str, Any] | None = None,
+        base_url: str | None = None, api_key: str | None = None,
     ) -> dict[str, Any]:
-        headers = {"Authorization": f"Bearer {self.settings.api_key}"}
-        url = f"{self.settings.base_url}{path}"
+        headers = {"Authorization": f"Bearer {api_key or self.settings.api_key}"}
+        url = f"{base_url or self.settings.base_url}{path}"
         last_error: LLMError | None = None
         for attempt in range(len(self._retry_delays) + 1):
             if attempt:
@@ -166,17 +165,17 @@ class TokenFactoryClient:
                 ) as client:
                     resp = await client.request(method, url, json=payload, headers=headers)
             except httpx.HTTPError as exc:
-                last_error = LLMError(f"Token Factory request failed: {exc}")
+                last_error = LLMError(f"Model API request failed: {exc}")
                 continue
             if resp.status_code == 200:
                 try:
                     return resp.json()
                 except ValueError as exc:
                     raise LLMError(
-                        f"Token Factory returned non-JSON: {resp.text[:200]}"
+                        f"Model API returned non-JSON: {resp.text[:200]}"
                     ) from exc
             last_error = LLMError(
-                f"Token Factory {resp.status_code}: {resp.text[:300]}",
+                f"Model API {resp.status_code}: {resp.text[:300]}",
                 status=resp.status_code,
             )
             if resp.status_code not in RETRY_STATUSES:

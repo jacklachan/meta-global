@@ -26,7 +26,7 @@ from copilot import incidents
 from copilot.bundle import BundleError, build_bundle, describe
 from copilot.config import load_settings
 from copilot.investigator import Investigator
-from copilot.llm import TokenFactoryClient
+from copilot.llm import ChatClient
 from copilot.research import Researcher, TavilyClient
 from copilot.workspace import Workspace
 from data.generator import get_available_tasks, load_scenario
@@ -42,7 +42,7 @@ PHASES = {"triage": 1, "diagnosis": 2, "research": 3, "report": 4}
 
 def make_llm() -> Any:
     """Seam for tests."""
-    return TokenFactoryClient()
+    return ChatClient()
 
 
 Guard = Callable[[], AbstractAsyncContextManager[Any]]
@@ -106,7 +106,7 @@ def create_server(local_files: bool, guard: Guard | None = None) -> MCPServer:
         title="Hindsight",
         description="Investigates production incidents and writes the postmortem.",
         instructions=INSTRUCTIONS,
-        website_url="https://github.com/jacklachan/Nebius-x-NVIDIA",
+        website_url="https://github.com/jacklachan/meta-global",
     )
 
     @server.tool(title="List sample incidents")

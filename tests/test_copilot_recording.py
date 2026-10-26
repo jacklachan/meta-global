@@ -27,7 +27,7 @@ class Model:
 
 
 def test_cli_recording_replays_through_the_api(tmp_path, monkeypatch):
-    monkeypatch.setattr(cli, "TokenFactoryClient", Model)
+    monkeypatch.setattr(cli, "ChatClient", Model)
     path = tmp_path / "recordings" / "seed-5-easy.json"
 
     code = cli.main(["investigate", "--seed", "5", "--difficulty", "easy",
@@ -38,7 +38,7 @@ def test_cli_recording_replays_through_the_api(tmp_path, monkeypatch):
     store = api._Store()
     store.load_recordings()
     monkeypatch.setattr(api, "store", store)
-    monkeypatch.delenv("NEBIUS_API_KEY", raising=False)
+    monkeypatch.delenv("MODEL_API_KEY", raising=False)
 
     with TestClient(app) as client:
         listing = client.get("/api/copilot/investigations").json()
@@ -53,7 +53,7 @@ def test_cli_recording_replays_through_the_api(tmp_path, monkeypatch):
 
 
 def test_failed_run_is_not_recorded(tmp_path, monkeypatch):
-    monkeypatch.delenv("NEBIUS_API_KEY", raising=False)
+    monkeypatch.delenv("MODEL_API_KEY", raising=False)
     monkeypatch.chdir(tmp_path)
     path = tmp_path / "rec.json"
     assert cli.main(["investigate", "--seed", "5", "--record", str(path)]) == 1

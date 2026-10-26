@@ -2,9 +2,9 @@
 
 Three stages, three models:
 
-  triage     Many short calls on the small Nemotron model. Each one picks the
+  triage     Many short calls on the triage model. Each one picks the
              next piece of evidence to pull. Cheap, fast, latency-sensitive.
-  diagnosis  One or two calls on the large Nemotron model. Reads the whole
+  diagnosis  One or two calls on the reasoning model. Reads the whole
              evidence ledger and commits to a root cause and causal chain,
              citing evidence IDs. It may ask for a few more lookups once.
   research   Optional. Web search (Tavily) for the diagnosed failure mode,

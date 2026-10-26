@@ -48,7 +48,7 @@ _running = 0
 @asynccontextmanager
 async def spend_guard():
     """Hold MCP callers to the same limits as the web UI: both spend the
-    server's own Token Factory key."""
+    server's own Model API key."""
     global _running
     if _running >= api.MAX_CONCURRENT:
         raise ToolError("Other investigations are running. Try again in a minute.")

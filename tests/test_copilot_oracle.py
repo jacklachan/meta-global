@@ -102,7 +102,7 @@ def test_oracle_benchmark_is_the_ceiling():
 
 @pytest.fixture
 def client(monkeypatch):
-    monkeypatch.delenv("NEBIUS_API_KEY", raising=False)     # no key anywhere
+    monkeypatch.delenv("MODEL_API_KEY", raising=False)     # no key anywhere
     monkeypatch.setattr(api, "store", api._Store())
     monkeypatch.setattr(api, "ORACLE_PACE_S", 0.0)
     with TestClient(app) as c:

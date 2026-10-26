@@ -1,37 +1,37 @@
 """Runtime configuration for the copilot.
 
 Everything is read from environment variables so the same code runs locally,
-in Docker and on a Nebius Serverless Endpoint. See ``.env.example``.
+in Docker and on a hosted Space. See ``.env.example``.
 """
 
 from __future__ import annotations
 
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
-NEBIUS_BASE_URL = "https://api.tokenfactory.nebius.com/v1"
+MODEL_API_BASE_URL = "https://api.meta.ai/v1"
 
-# The three jobs an investigation needs, cheapest first. Each maps to one
-# NVIDIA Nemotron model served on Nebius Token Factory.
+# The three jobs an investigation needs, cheapest first. Each runs on the
+# model configured for it; by default all three use Muse Spark on Meta Model API.
 ROLE_TRIAGE = "triage"    # many small calls: pick the next piece of evidence
 ROLE_REASON = "reason"    # one or two big calls: root cause + causal chain
 ROLE_WRITER = "writer"    # one call: turn the diagnosis into a postmortem
 ROLES = (ROLE_TRIAGE, ROLE_REASON, ROLE_WRITER)
 
-# Model IDs and prices are from the Token Factory catalog as of 2026-10-08.
+# Standard, not -contributor: real incident bundles hold private logs, and
+# contributor traffic is used to improve Meta's products.
 DEFAULT_MODELS = {
-    ROLE_TRIAGE: "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
-    ROLE_REASON: "nvidia/Nemotron-3-Ultra-550b-a55b",
-    ROLE_WRITER: "nvidia/nemotron-3-super-120b-a12b",
+    ROLE_TRIAGE: "muse-spark-1.3",
+    ROLE_REASON: "muse-spark-1.3",
+    ROLE_WRITER: "muse-spark-1.3",
 }
 
 # USD per 1M tokens: (input, output). Keys are lower-cased model IDs.
+# From dev.meta.ai/models/muse-spark as of 2026-10-26.
 PRICES_PER_MTOK = {
-    "nvidia/nvidia-nemotron-3-nano-30b-a3b": (0.06, 0.24),
-    "nvidia/nemotron-3-super-120b-a12b": (0.30, 0.90),
-    "nvidia/nemotron-3-ultra-550b-a55b": (1.00, 3.00),
-    "nvidia/nemotron-3_5-lightning": (0.06, 0.24),
+    "muse-spark-1.3": (1.25, 4.25),
+    "muse-spark-1.3-contributor": (0.10, 0.20),
 }
 
 _ENV_BY_ROLE = {
@@ -47,9 +47,17 @@ class Settings:
     base_url: str
     models: dict[str, str]
     tavily_api_key: str | None
+    # Per-role server overrides, e.g. triage on a self-hosted fine-tuned model.
+    role_base_urls: dict[str, str] = field(default_factory=dict)
+    role_api_keys: dict[str, str] = field(default_factory=dict)
 
     def model_for(self, role: str) -> str:
         return self.models[role]
+
+    def endpoint_for(self, role: str) -> tuple[str, str | None]:
+        """(base URL, API key) for ``role``: its override, else Model API."""
+        return (self.role_base_urls.get(role, self.base_url),
+                self.role_api_keys.get(role, self.api_key))
 
 
 def load_dotenv(path: str | Path = ".env") -> None:
@@ -74,11 +82,17 @@ def load_settings() -> Settings:
         role: os.environ.get(_ENV_BY_ROLE[role]) or DEFAULT_MODELS[role]
         for role in ROLES
     }
+    urls = {role: os.environ[f"COPILOT_BASE_URL_{role.upper()}"].rstrip("/")
+            for role in ROLES if os.environ.get(f"COPILOT_BASE_URL_{role.upper()}")}
+    keys = {role: os.environ[f"COPILOT_API_KEY_{role.upper()}"]
+            for role in ROLES if os.environ.get(f"COPILOT_API_KEY_{role.upper()}")}
     return Settings(
-        api_key=os.environ.get("NEBIUS_API_KEY") or None,
-        base_url=(os.environ.get("NEBIUS_BASE_URL") or NEBIUS_BASE_URL).rstrip("/"),
+        api_key=os.environ.get("MODEL_API_KEY") or None,
+        base_url=(os.environ.get("MODEL_API_BASE_URL") or MODEL_API_BASE_URL).rstrip("/"),
         models=models,
         tavily_api_key=os.environ.get("TAVILY_API_KEY") or None,
+        role_base_urls=urls,
+        role_api_keys=keys,
     )
 
 

@@ -1,4 +1,4 @@
-"""Token Factory client: routing, retries, accounting and JSON extraction."""
+"""Model API client: routing, retries, accounting and JSON extraction."""
 
 import asyncio
 import json
@@ -12,8 +12,9 @@ from copilot.config import (
     ROLE_TRIAGE,
     Settings,
     cost_usd,
+    load_settings,
 )
-from copilot.llm import LLMError, TokenFactoryClient, extract_json
+from copilot.llm import ChatClient, LLMError, extract_json
 
 
 def _settings(api_key="test-key"):
@@ -33,7 +34,7 @@ def _completion(text, prompt_tokens=100, completion_tokens=20):
 
 
 def _client(handler, **kwargs):
-    return TokenFactoryClient(
+    return ChatClient(
         settings=_settings(**kwargs),
         transport=httpx.MockTransport(handler),
         retry_delays=(0.0, 0.0),
@@ -114,9 +115,9 @@ def test_meter_accumulates_tokens_and_cost_per_role():
 
     snap = client.meter.snapshot()
     assert snap["by_role"][ROLE_TRIAGE]["calls"] == 2
-    assert snap["by_role"][ROLE_TRIAGE]["cost_usd"] == pytest.approx(0.60)
-    assert snap["by_role"][ROLE_REASON]["cost_usd"] == pytest.approx(4.00)
-    assert snap["total_cost_usd"] == pytest.approx(4.60)
+    assert snap["by_role"][ROLE_TRIAGE]["cost_usd"] == pytest.approx(11.00)
+    assert snap["by_role"][ROLE_REASON]["cost_usd"] == pytest.approx(5.50)
+    assert snap["total_cost_usd"] == pytest.approx(16.50)
 
 
 def test_cost_is_zero_for_unknown_model():
@@ -140,3 +141,35 @@ def test_extract_json_tolerates_wrapping(raw):
 def test_extract_json_rejects_non_objects(raw):
     with pytest.raises(ValueError):
         extract_json(raw)
+
+
+def test_role_override_sends_that_role_to_its_own_server():
+    seen = []
+
+    def handler(request):
+        seen.append((str(request.url), request.headers["authorization"]))
+        return httpx.Response(200, json=_completion("ok"))
+
+    settings = Settings(
+        api_key="meta-key", base_url="https://api.meta.test/v1",
+        models=dict(DEFAULT_MODELS), tavily_api_key=None,
+        role_base_urls={ROLE_TRIAGE: "https://modal.test/v1"},
+        role_api_keys={ROLE_TRIAGE: "modal-key"},
+    )
+    client = ChatClient(settings=settings, transport=httpx.MockTransport(handler))
+    asyncio.run(client.chat(ROLE_TRIAGE, []))
+    asyncio.run(client.chat(ROLE_REASON, []))
+
+    assert seen == [
+        ("https://modal.test/v1/chat/completions", "Bearer modal-key"),
+        ("https://api.meta.test/v1/chat/completions", "Bearer meta-key"),
+    ]
+
+
+def test_load_settings_reads_role_overrides(monkeypatch):
+    monkeypatch.setenv("MODEL_API_KEY", "k")
+    monkeypatch.setenv("COPILOT_BASE_URL_TRIAGE", "https://modal.test/v1/")
+    monkeypatch.delenv("COPILOT_API_KEY_TRIAGE", raising=False)
+    s = load_settings()
+    assert s.endpoint_for(ROLE_TRIAGE) == ("https://modal.test/v1", "k")
+    assert s.endpoint_for(ROLE_REASON) == ("https://api.meta.ai/v1", "k")

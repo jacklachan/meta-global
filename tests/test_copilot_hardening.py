@@ -6,9 +6,21 @@ import json
 import httpx
 import pytest
 
-from copilot.config import DEFAULT_MODELS, ROLE_REASON, ROLE_TRIAGE, ROLE_WRITER, Settings
+from copilot.config import (
+    DEFAULT_MODELS,
+    ROLE_REASON,
+    ROLE_TRIAGE,
+    ROLE_WRITER,
+    Settings,
+)
 from copilot.investigator import EFFECT_TAXONOMY, Investigator, snap_effect
-from copilot.llm import ChatResult, TokenFactoryClient, UsageMeter, extract_json, strip_reasoning
+from copilot.llm import (
+    ChatClient,
+    ChatResult,
+    UsageMeter,
+    extract_json,
+    strip_reasoning,
+)
 from copilot.workspace import Workspace, normalise_call
 from data.incident_generator import generate_incident
 
@@ -20,7 +32,7 @@ def _client(message, finish_reason="stop"):
             "usage": {"prompt_tokens": 1, "completion_tokens": 1}})
     settings = Settings(api_key="k", base_url="https://tf.test/v1",
                         models=dict(DEFAULT_MODELS), tavily_api_key=None)
-    return TokenFactoryClient(settings, transport=httpx.MockTransport(handler))
+    return ChatClient(settings, transport=httpx.MockTransport(handler))
 
 
 def test_answer_left_in_the_reasoning_field_is_used():

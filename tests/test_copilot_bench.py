@@ -25,7 +25,7 @@ class AnswerKey:
         prompt = messages[-1]["content"]
         seed = int(prompt.split('"incident_id":"seed_')[1].split("_")[0])
         if seed in self.broken:
-            raise LLMError("Token Factory 500: boom", status=500)
+            raise LLMError("Model API 500: boom", status=500)
         truth = generate_scenario(seed, self.difficulty)["ground_truth"]
         reply = {"thought": "stop", "tool": "done", "confidence": 0.8,
                  "root_cause_ids": truth["cause"].split("+") if seed in self.knows else [],

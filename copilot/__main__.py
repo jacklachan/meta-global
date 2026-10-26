@@ -16,16 +16,22 @@ import asyncio
 import json
 import sys
 import time
+from dataclasses import replace
 from pathlib import Path
 
-from dataclasses import replace
-
 from copilot import incidents
+from copilot.bench import (
+    BASELINES,
+    ORACLE,
+    ORACLE_ABOUT,
+    parse_seeds,
+    run_baseline,
+    run_benchmark,
+)
 from copilot.bundle import BundleError, build_bundle, describe, named_paths
-from copilot.bench import BASELINES, ORACLE, ORACLE_ABOUT, parse_seeds, run_baseline, run_benchmark
 from copilot.config import ROLE_REASON, ROLE_TRIAGE, ROLES, load_dotenv, load_settings
 from copilot.investigator import Investigator
-from copilot.llm import LLMError, TokenFactoryClient
+from copilot.llm import ChatClient, LLMError
 from copilot.research import Researcher, TavilyClient
 from copilot.workspace import Workspace
 
@@ -79,7 +85,7 @@ async def _investigate(args: argparse.Namespace) -> int:
     else:
         scenario = incidents.from_seed(args.seed, args.difficulty)
 
-    llm = TokenFactoryClient()
+    llm = ChatClient()
     key = llm.settings.tavily_api_key
     researcher = Researcher(llm, TavilyClient(key)) if key else None
     investigator = Investigator(Workspace(scenario), llm, researcher=researcher)
@@ -114,15 +120,18 @@ async def _investigate(args: argparse.Namespace) -> int:
 
 async def _models() -> int:
     settings = load_settings()
-    available = await TokenFactoryClient(settings).list_models()
+    available = await ChatClient(settings).list_models()
     by_lower = {m.lower(): m for m in available}
     for role in ROLES:
         wanted = settings.model_for(role)
+        if role in settings.role_base_urls:
+            print(f"{role:<7} {wanted}  [self-hosted at {settings.role_base_urls[role]}]")
+            continue
         found = by_lower.get(wanted.lower())
         status = "ok" if found == wanted else (f"use {found}" if found else "NOT FOUND")
         print(f"{role:<7} {wanted}  [{status}]")
-    print("\nNVIDIA models on Token Factory:")
-    for model in sorted(m for m in available if "nvidia" in m.lower()):
+    print("\nModels on Meta Model API:")
+    for model in sorted(available):
         print(f"  {model}")
     return 0
 
@@ -161,7 +170,7 @@ async def _bench(args: argparse.Namespace) -> int:
 
     result = await run_benchmark(
         parse_seeds(args.seeds), args.difficulty,
-        lambda: TokenFactoryClient(settings), args.concurrency, show)
+        lambda: ChatClient(settings), args.concurrency, show)
     result.update(label=args.label, kind="model", models={
         ROLE_TRIAGE: models[ROLE_TRIAGE], ROLE_REASON: models[ROLE_REASON]})
     _save_bench(result, args)
@@ -198,7 +207,7 @@ def main(argv: list[str] | None = None) -> int:
                                       "(put it in copilot/recordings/ to ship it with the demo)")
     inv.add_argument("--json", action="store_true", help="print raw events, one per line")
 
-    sub.add_parser("models", help="check the configured models exist on Token Factory")
+    sub.add_parser("models", help="check the configured models exist on Meta Model API")
 
     bench = sub.add_parser("bench", help="score the investigator on generated incidents")
     bench.add_argument("--seeds", default="0-9", help="for example 0-19 or 3,7,42")
