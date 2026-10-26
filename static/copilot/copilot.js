@@ -45,10 +45,10 @@
     try {
       status = await api("/status");
       $("bar-note").textContent = status.ready
-        ? "Running on NVIDIA Nemotron via Nebius Token Factory"
+        ? "Running on Muse Spark via Meta Model API"
         : "";
       setNotice($("notice"), status.ready ? "" :
-        "This server has no Nebius key, so new investigations cannot start. Recorded investigations below still open.");
+        "This server has no Model API key, so new investigations cannot start. Recorded investigations below still open.");
       const [incidents, runs, results] = await Promise.all(
         [api("/incidents"), api("/investigations"), api("/benchmarks")]);
       renderCases(incidents);
@@ -152,7 +152,7 @@
     const span = Math.min(...counts) === Math.max(...counts)
       ? `${counts[0]}` : `${Math.min(...counts)} to ${Math.max(...counts)}`;
     $("board-note").textContent = `${span} incidents per cell.`
-      + (hasModel ? "" : " Results for the Nemotron investigator have not been recorded yet.");
+      + (hasModel ? "" : " Results for the Muse Spark investigator have not been recorded yet.");
   }
 
   async function start(body, button, alwaysAllowed) {

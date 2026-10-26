@@ -1,4 +1,4 @@
-"""Run the web app with a scripted stand-in for the Nemotron models.
+"""Run the web app with a scripted stand-in for the models.
 
 For front-end work only: it lets you watch a full investigation stream
 through the UI with no API key and no spend. The stand-in reads the answer
@@ -18,7 +18,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-os.environ.setdefault("NEBIUS_API_KEY", "scripted-dev-key")
+os.environ.setdefault("MODEL_API_KEY", "scripted-dev-key")
 
 import uvicorn  # noqa: E402
 
@@ -104,7 +104,7 @@ class ScriptedModel:
             }
         return {
             "title": "Scripted stand-in postmortem",
-            "summary": "This document was produced by the scripted development model, not by Nemotron.",
+            "summary": "This document was produced by the scripted development model, not by Muse Spark.",
             "impact": "Users of the affected services saw errors for the length of the incident.",
             "action_items": [
                 {"action": "Load-test capacity changes before rollout", "priority": "P0",
