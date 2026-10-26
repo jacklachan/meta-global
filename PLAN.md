@@ -41,12 +41,12 @@ Source repo: `~/Downloads/nvidia and amazon hackathon/postmortem` (remote `jackl
 
 **Repo:** start a new repo, e.g. `jacklachan/hindsight`, from this one **with git history kept**, and write an honest "What existed before" section (the current README already has the right shape). First, check the Official Rules on prior work and team size. PostmortemEnv (April, team of three) is prior work.
 
-## 2. Swap to Muse Spark
+## 2. Swap to Muse Spark ✅ done Oct 26 (commit `65a329c`)
 
 Meta Model API uses the same OpenAI chat-completions format as Nebius, so `llm.py` mostly stays the same.
 
 - Base URL: `https://api.meta.ai/v1`. Key env var: `MODEL_API_KEY`.
-- Models: `muse-spark-1.3` (also `-contributor`, a discounted mode; check what that means for data use before choosing it).
+- Models: `muse-spark-1.3`, $1.25 in / $4.25 out per 1M tokens. `muse-spark-1.3-contributor` costs $0.10 / $0.20, but Meta uses that traffic to improve its products: fine for the synthetic benchmark, never for real incident data.
 
 Changes:
 1. **`copilot/config.py`**
@@ -64,9 +64,10 @@ Leave the three-role split in place. Once the fine-tuned model exists, it takes 
 ## 3. Fine-tune a small open-weights Meta model on Modal
 
 **Model choice (decide Day 1, morning):**
-- **Muse Glimmer 30B** (Apache 2.0; Meta's distilled open-weights model) is the most on-theme. Check that it's on Hugging Face, loads in `transformers`/TRL, and fits QLoRA on one 80 GB GPU.
-- **Fallback: Llama 3.1 8B Instruct.** Proven with TRL + LoRA, cheap, fast to iterate. Use it if Glimmer fails any of the checks above.
+The participant guide lists only **Muse Glimmer** and **Muse Spark Open** as open-weights models, so Llama is out.
+- **Muse Glimmer 30B** (Apache 2.0, dense) is the target. Check that it's on Hugging Face, loads in `transformers`/TRL, and fits QLoRA on one 80 GB GPU.
 - Not Muse Spark Open: 816B MoE, far beyond a $100 budget.
+- **Fallback if Glimmer can't be fine-tuned in time:** serve Glimmer *untrained* as the cheap triage model (still a Meta open-weights model doing real work) and present the fine-tune as attempted, with the reason it stopped.
 
 **What it learns:** the **triage** step only. Input: system prompt + incident brief + evidence ledger so far. Output: one JSON action (`{"thought", "tool", "args"}` or `done`). It runs ~5–12 times per incident, so it's where most calls and cost are. Diagnosis stays on Muse Spark.
 
@@ -119,8 +120,9 @@ Times are IST. College runs 9–5, so weekday evenings give about 4 hours, and S
 
 ## Open questions to settle Day 1
 
-- [ ] Official Rules: is building on PostmortemEnv / Hindsight allowed with disclosure? Solo or team?
-- [ ] Muse Spark pricing and rate limits; what "Contributor" mode means for your data.
+- [ ] Official Rules: is building on PostmortemEnv / Hindsight allowed with disclosure? Solo or team? (Guide pasted so far stops at section 2.)
+- [x] Muse Spark pricing: $1.25 / $4.25 per 1M (standard), $0.10 / $0.20 (contributor; data used by Meta). Rate limits still unknown.
+- [x] Open weights allowed: Muse Glimmer and Muse Spark Open only.
 - [ ] Muse Glimmer: HF repo ID, license gate, TRL support.
 - [ ] Modal GPU prices; is $100 enough for Glimmer QLoRA?
 - [ ] Is the Model API open to developers in India? (A third-party guide said US-only preview; the hackathon presumably grants access.)
