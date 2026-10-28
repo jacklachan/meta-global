@@ -44,13 +44,14 @@
     document.title = "Hindsight";
     try {
       status = await api("/status");
-      $("bar-note").textContent = status.ready
-        ? "Running on Muse Spark via Meta Model API"
-        : "";
       setNotice($("notice"), status.ready ? "" :
         "This server has no Model API key, so new investigations cannot start. Recorded investigations below still open.");
       const [incidents, runs, results] = await Promise.all(
         [api("/incidents"), api("/investigations"), api("/benchmarks")]);
+      const models = [...new Set(Object.values(status.models || {})
+        .map((m) => (m.startsWith("scripted/") ? "scripted stand-in" : m)))].join(", ");
+      $("bar-note").textContent = (status.ready ? `Models: ${models}` : "No model key")
+        + (results.some((r) => r.kind === "model") ? "" : " · no model results recorded yet");
       renderCases(incidents);
       renderRuns(runs);
       renderBoard(results);

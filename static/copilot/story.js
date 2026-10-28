@@ -34,24 +34,24 @@
   // Scene 1: the status wall goes red in the order the services failed.
   function wall() {
     const start = t(S.window.start);
-    $("wall-when").innerHTML = `${esc(day(start))} · ${hm(start)} UTC · <b>production</b>`;
+    $("wall-when").innerHTML = `<b>Generated incident</b> · ${esc(S.incident_id)} · ${esc(day(start))} ${hm(start)} UTC`;
     const onset = Object.fromEntries(S.onset.map((o) => [o.service, t(o.first_error)]));
     const span = Math.max(start, ...Object.values(onset)) - start + 30000;
     const failsAt = (s) => onset[s.name] ?? (s.status === "healthy" ? null : start + span);
     $("wall").innerHTML = S.services.map((s) => `
       <div class="tile" tabindex="0" aria-label="${esc(`${s.name}: ${s.status}, ${s.error_rate}% errors`)}">
-        <p class="t-name">${esc(s.name)}</p><p class="t-state">healthy</p>
-        <p class="t-rate">0.0<small>% errors</small></p>
+        <p class="t-name">${esc(s.name)}</p><p class="t-state">no errors yet</p>
+        <p class="t-rate">–<small>% errors in the outage</small></p>
         <p class="t-deps">${s.deps.length ? `calls ${esc(s.deps.join(", "))}` : "calls nothing"}</p></div>`).join("");
     const tiles = [...$("wall").children];
     const frame = (now) => {
       $("wall-clock").textContent = `${hms(now)} UTC`;
       tiles.forEach((el, i) => {
+        // Only recorded values: the onset time and the error rate for the whole outage.
         const s = S.services[i], at = failsAt(s), failing = at != null && now >= at;
-        const rate = at == null ? s.error_rate : failing ? s.error_rate * Math.min(1, (now - at) / 20000) : 0.2;
         el.className = `tile${failing ? ` ${s.status}` : ""}`;
-        el.querySelector(".t-state").textContent = failing ? s.status : "healthy";
-        el.querySelector(".t-rate").firstChild.textContent = rate.toFixed(1);
+        el.querySelector(".t-state").textContent = at == null ? s.status : failing ? s.status : "no errors yet";
+        el.querySelector(".t-rate").firstChild.textContent = at == null || failing ? s.error_rate.toFixed(1) : "–";
       });
     };
     let raf;
@@ -172,7 +172,7 @@
     ev.forEach((e) => { if (e.args.service) (bySvc[e.args.service] ||= []).push(e.id); });
     const causeEv = ev.filter((e) => S.cause.some((id) => Object.values(e.args).includes(id))).map((e) => e.id);
     const trace = ev.filter((e) => e.tool === "get_trace").map((e) => e.id);
-    $("proof-kicker").textContent = `Reference investigation · ${ev.length} lookups · every step cited`;
+    $("proof-kicker").textContent = `Reference investigation · given the answer, not an AI model · ${ev.length} lookups`;
     $("p-chain").innerHTML = S.chain.map((h, i) => `<li>
       <span class="p-eff">${esc(h.effect.replace(/_/g, " "))}</span>
       <span class="p-svc">${esc(h.service)}</span>
@@ -202,7 +202,8 @@
       <ol>${S.chain.map((h) => `<li>${esc(h.service)}: ${esc(h.effect.replace(/_/g, " "))} ${logsFor(h.service).map(tag).join(" ")}</li>`).join("")}</ol>
       ${decoy ? `<h4>Ruled out</h4><p>${S.changes.length - S.cause.length} other changes, including <code>${esc(decoy.id)}</code>
         (“${esc(decoy.what)}”), which landed later and closer to the outage.</p>` : ""}
-      <h4>Scored against the known answer</h4><p>${Number(S.score).toFixed(2)} out of 1.00. Every tag opens the evidence it came from.</p>`;
+      <h4>Where this comes from</h4><p>Assembled from the reference investigation, which was given the answer
+        and scored ${Number(S.score).toFixed(2)} out of 1.00. Every tag opens the evidence it came from.</p>`;
   }
 
   // The clock in the corner moves from the outage to the next morning.
@@ -210,7 +211,7 @@
     const start = t(S.window.start), end = t(S.window.end);
     const scenes = document.querySelectorAll(".scene[data-clock]");
     const labels = [`${hm(start)} UTC · outage begins`, `${hm(start)} UTC · what changed?`,
-      `${hm(end)} UTC · outage over`, "next morning · 09:30"];
+      `${hm(end)} UTC · outage over`, "afterwards · the postmortem"];
     scenes.forEach((s, i) => { s.dataset.clock = labels[i] || s.dataset.clock; });
     $("story-clock").textContent = labels[0];
     if (!("IntersectionObserver" in window)) return;

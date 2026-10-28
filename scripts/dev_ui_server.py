@@ -19,6 +19,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 os.environ.setdefault("MODEL_API_KEY", "scripted-dev-key")
+# So /status (and the top bar) name the stand-in, not a model that isn't running.
+for _role in ("triage", "reason", "writer"):
+    os.environ.setdefault(f"COPILOT_MODEL_{_role.upper()}", f"scripted/{_role}-stand-in")
 
 import uvicorn  # noqa: E402
 

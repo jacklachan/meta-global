@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..800;1,62..125,400..800&family=Martian+Mono:wdth,wght@75..112,400..700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/copilot/copilot.css?v=5">
+<link rel="stylesheet" href="/static/copilot/copilot.css?v=7">
 </head>
 <body>
 <header class="bar">
@@ -27,16 +27,16 @@
 <div class="story" id="story">
   <p class="story-clock" id="story-clock" aria-hidden="true"></p>
 
-  <section class="scene scene-wall" data-clock="Sun · 17:03 UTC">
-    <p class="kicker" id="wall-when">Sunday · 17:03 UTC · production</p>
-    <h1>One of today's changes <em>just broke production.</em></h1>
+  <section class="scene scene-wall" data-clock="">
+    <p class="kicker" id="wall-when">Generated incident</p>
+    <h1>One recent change <em>just broke production.</em></h1>
     <div class="wall" id="wall" aria-label="Service status"></div>
-    <p class="wall-foot"><span id="wall-clock">17:03:00</span> <button type="button" class="ghost" id="wall-replay">Replay</button></p>
-    <p class="lede">Hindsight works out which change it was, from the logs, traces and diffs, and writes the postmortem with every claim tied to its evidence. Try finding it yourself first.</p>
+    <p class="wall-foot"><span id="wall-clock">17:03:00</span> <span>replay of the recorded first errors</span> <button type="button" class="ghost" id="wall-replay">Replay</button></p>
+    <p class="lede">Hindsight is built to work out which change it was from the logs, traces and diffs, and to write the postmortem with every claim tied to its evidence. This incident is generated and has a known answer. No AI model result is shown here yet. Try finding the culprit yourself first.</p>
     <p class="scene-ctas"><a class="button bright" href="#game">Find the culprit</a> <a class="button ghost" href="#intake">Skip to the incidents</a></p>
   </section>
 
-  <section class="scene scene-game" id="game" aria-labelledby="game-h" data-clock="Sun · 17:09 UTC">
+  <section class="scene scene-game" id="game" aria-labelledby="game-h" data-clock="">
     <p class="kicker" id="game-kicker"></p>
     <h2 id="game-h">One of them did this. <em>Which one?</em></h2>
     <div class="game">
@@ -53,7 +53,7 @@
     </div>
   </section>
 
-  <section class="scene scene-proof" aria-labelledby="proof-h" data-clock="Sun · 17:11 UTC">
+  <section class="scene scene-proof" aria-labelledby="proof-h" data-clock="">
     <p class="kicker" id="proof-kicker"></p>
     <h2 id="proof-h">The answer, <em>with its evidence.</em></h2>
     <div class="proof">
@@ -62,9 +62,9 @@
     </div>
   </section>
 
-  <section class="scene scene-morning" aria-labelledby="morning-h" data-clock="Mon · 09:30">
-    <p class="kicker">Monday · 09:30 · the postmortem review</p>
-    <h2 id="morning-h">The postmortem, <em>already written.</em></h2>
+  <section class="scene scene-morning" aria-labelledby="morning-h" data-clock="">
+    <p class="kicker">Afterwards · the postmortem</p>
+    <h2 id="morning-h">The postmortem, <em>every claim cited.</em></h2>
     <article class="m-doc" id="m-doc"></article>
     <p class="scene-ctas"><a class="button" href="#intake">Investigate an incident</a> <a class="button quiet" href="#measured">See how it's scored</a></p>
   </section>
@@ -170,7 +170,7 @@
   </section>
 </main>
 
-<script src="/static/copilot/copilot.js?v=5"></script>
-<script src="/static/copilot/story.js?v=5"></script>
+<script src="/static/copilot/copilot.js?v=7"></script>
+<script src="/static/copilot/story.js?v=7"></script>
 </body>
 </html>
