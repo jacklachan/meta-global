@@ -174,6 +174,7 @@ This is disclosed in full so judges can see what was built here.
 
 - **PostmortemEnv** (April 2026, Meta PyTorch OpenEnv Hackathon): the reinforcement-learning environment this started from. Its README is kept at [docs/POSTMORTEMENV.md](docs/POSTMORTEMENV.md); its history is the start of this repository's commit log. Carried over: the five hand-written sample incidents and the original environment, now an optional add-on at `/lab` that the product does not import.
 - **Hindsight on Nemotron** (October 2026, built for the Nebius x NVIDIA hackathon, never submitted): the product layer, meaning the evidence store, evaluator, failure-mode vocabulary, incident generator, investigator, research step, postmortem writer, bundle builder, MCP server, benchmark runner, web API and UI. It targeted Nemotron models on Nebius and was never run against a real model.
+
 Both were team work (L Mohit Jain, Tanush Deepak, Utkarsh Singh Yadav).
 
 - **Built for this hackathon, solo** (from October 26, 2026; every commit after `b791dc5`): the move to Meta Model API and Muse Spark, per-role model servers, the triage training data and its prompt-match test, the Glimmer fine-tuning and serving on Modal, and every real-model result in the table above.
