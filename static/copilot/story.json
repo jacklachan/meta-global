@@ -1,0 +1,330 @@
+{
+ "incident_id": "seed_3_medium",
+ "description": "Starting 17:03 UTC, shipping-service returned errors for 17 minutes and 4 services were degraded or down. Find what started the outage and how the failure spread.",
+ "window": {
+  "start": "2026-07-05T17:03:00Z",
+  "end": "2026-07-05T17:20:00Z"
+ },
+ "services": [
+  {
+   "name": "mobile-bff",
+   "status": "healthy",
+   "deps": [
+    "shipping-service",
+    "order-manager"
+   ],
+   "error_rate": 1.2
+  },
+  {
+   "name": "shipping-service",
+   "status": "degraded",
+   "deps": [
+    "auth-service"
+   ],
+   "error_rate": 44.1
+  },
+  {
+   "name": "order-manager",
+   "status": "healthy",
+   "deps": [
+    "payment-gateway",
+    "orders-db",
+    "event-queue"
+   ],
+   "error_rate": 1.1
+  },
+  {
+   "name": "payment-gateway",
+   "status": "healthy",
+   "deps": [],
+   "error_rate": 1.5
+  },
+  {
+   "name": "auth-service",
+   "status": "degraded",
+   "deps": [
+    "catalog-service"
+   ],
+   "error_rate": 63.1
+  },
+  {
+   "name": "catalog-service",
+   "status": "degraded",
+   "deps": [
+    "orders-db",
+    "event-queue"
+   ],
+   "error_rate": 41.6
+  },
+  {
+   "name": "orders-db",
+   "status": "down",
+   "deps": [],
+   "error_rate": 89.1
+  },
+  {
+   "name": "event-queue",
+   "status": "healthy",
+   "deps": [],
+   "error_rate": 0.3
+  }
+ ],
+ "onset": [
+  {
+   "service": "orders-db",
+   "first_error": "2026-07-05T17:03:30Z",
+   "errors": 6
+  },
+  {
+   "service": "catalog-service",
+   "first_error": "2026-07-05T17:04:00Z",
+   "errors": 2
+  },
+  {
+   "service": "auth-service",
+   "first_error": "2026-07-05T17:04:41Z",
+   "errors": 2
+  },
+  {
+   "service": "shipping-service",
+   "first_error": "2026-07-05T17:04:49Z",
+   "errors": 2
+  }
+ ],
+ "changes": [
+  {
+   "id": "commit-d6ceed23",
+   "kind": "commit",
+   "service": "shipping-service",
+   "when": "2026-07-04T18:01:00Z",
+   "what": "feat: expose build info on /version"
+  },
+  {
+   "id": "commit-295d1106",
+   "kind": "commit",
+   "service": "order-manager",
+   "when": "2026-07-04T18:46:00Z",
+   "what": "refactor: extract config loader into its own package"
+  },
+  {
+   "id": "cfg-3-002",
+   "kind": "config",
+   "service": "payment-gateway",
+   "when": "2026-07-04T19:10:00Z",
+   "what": "Temporarily raise log level for a support ticket"
+  },
+  {
+   "id": "cfg-3-003",
+   "kind": "config",
+   "service": "mobile-bff",
+   "when": "2026-07-04T20:30:00Z",
+   "what": "Reduce paging noise on p99 alert"
+  },
+  {
+   "id": "commit-5410b98c",
+   "kind": "commit",
+   "service": "payment-gateway",
+   "when": "2026-07-04T20:58:00Z",
+   "what": "feat: add request id to access logs"
+  },
+  {
+   "id": "commit-84de162d",
+   "kind": "commit",
+   "service": "event-queue",
+   "when": "2026-07-04T21:49:00Z",
+   "what": "fix: correct typo in validation error"
+  },
+  {
+   "id": "cfg-3-004",
+   "kind": "config",
+   "service": "order-manager",
+   "when": "2026-07-04T22:52:00Z",
+   "what": "Lengthen cache TTL for catalogue pages"
+  },
+  {
+   "id": "commit-6d294fd9",
+   "kind": "commit",
+   "service": "event-queue",
+   "when": "2026-07-04T22:59:00Z",
+   "what": "chore: bump logging library to 2.4.1"
+  },
+  {
+   "id": "cfg-3-005",
+   "kind": "config",
+   "service": "event-queue",
+   "when": "2026-07-05T00:01:00Z",
+   "what": "Enable new dashboard for internal users"
+  },
+  {
+   "id": "infra-3-002",
+   "kind": "infra",
+   "service": "infrastructure",
+   "when": "2026-07-05T00:05:00Z",
+   "what": "Kernel patch applied to batch nodes during the maintenance window."
+  },
+  {
+   "id": "commit-4819e9b8",
+   "kind": "commit",
+   "service": "payment-gateway",
+   "when": "2026-07-05T01:47:00Z",
+   "what": "test: cover retry backoff jitter"
+  },
+  {
+   "id": "infra-3-000",
+   "kind": "infra",
+   "service": "infrastructure",
+   "when": "2026-07-05T02:03:00Z",
+   "what": "TTL lowered to 60s for the internal zone. Completed."
+  },
+  {
+   "id": "cfg-3-001",
+   "kind": "config",
+   "service": "event-queue",
+   "when": "2026-07-05T02:21:00Z",
+   "what": "Scale out ahead of the weekend campaign"
+  },
+  {
+   "id": "commit-b1936363",
+   "kind": "commit",
+   "service": "payment-gateway",
+   "when": "2026-07-05T04:35:00Z",
+   "what": "fix: tighten client retry budget"
+  },
+  {
+   "id": "infra-3-003",
+   "kind": "infra",
+   "service": "infrastructure",
+   "when": "2026-07-05T07:20:00Z",
+   "what": "Autoscaler added 2 nodes to the general pool."
+  },
+  {
+   "id": "infra-3-001",
+   "kind": "infra",
+   "service": "infrastructure",
+   "when": "2026-07-05T08:15:00Z",
+   "what": "TLS certificate rotated for *.internal. Completed."
+  },
+  {
+   "id": "commit-ea9e6fec",
+   "kind": "commit",
+   "service": "orders-db",
+   "when": "2026-07-05T10:22:00Z",
+   "what": "ci: pin base image digest"
+  },
+  {
+   "id": "commit-b84f0552",
+   "kind": "commit",
+   "service": "payment-gateway",
+   "when": "2026-07-05T10:35:00Z",
+   "what": "chore: remove unused feature flag for legacy onboarding"
+  },
+  {
+   "id": "commit-78b38cc4",
+   "kind": "commit",
+   "service": "catalog-service",
+   "when": "2026-07-05T11:37:00Z",
+   "what": "fix: handle empty page token in list endpoint"
+  },
+  {
+   "id": "cfg-3-000",
+   "kind": "config",
+   "service": "orders-db",
+   "when": "2026-07-05T12:16:00Z",
+   "what": "Sample more traces while debugging checkout"
+  },
+  {
+   "id": "commit-7069b230",
+   "kind": "commit",
+   "service": "orders-db",
+   "when": "2026-07-05T16:34:00Z",
+   "what": "perf: sort export rows in memory before streaming"
+  },
+  {
+   "id": "commit-2b67f413",
+   "kind": "commit",
+   "service": "event-queue",
+   "when": "2026-07-05T16:55:00Z",
+   "what": "docs: update runbook links"
+  }
+ ],
+ "cause": [
+  "commit-7069b230"
+ ],
+ "chain": [
+  {
+   "service": "orders-db",
+   "effect": "oom_crash_loop"
+  },
+  {
+   "service": "catalog-service",
+   "effect": "dependency_timeout"
+  },
+  {
+   "service": "auth-service",
+   "effect": "service_degradation"
+  },
+  {
+   "service": "shipping-service",
+   "effect": "complete_unavailability"
+  }
+ ],
+ "evidence": [
+  {
+   "id": "E1",
+   "tool": "get_commit",
+   "args": {
+    "commit_hash": "commit-7069b230"
+   },
+   "result": "Commit commit-7069b230\nService: orders-db\nAuthor: bob@example.com\nTimestamp: 2026-07-05T16:34:00Z\nMessage: perf: sort export rows in memory before streaming\n\n--- a/internal/export/stream.go\n+++ b/internal/export/stream.go\n@@ -30,9 +30,12 @@ func (e *Exporter) Stream(ctx context.Context, w io.Writer, q Query) error {\n \tenc := json.NewEncoder(w)\n-\tfor rows.Next() {\n-\t\tif err := enc.Encode(scan(rows)); err != nil {\n-\t\t\treturn err\n-\t\t}\n+\tall, err := scanAll(rows)\n+\tif err != nil {\n+\t\treturn err\n \t}"
+  },
+  {
+   "id": "E2",
+   "tool": "search_logs",
+   "args": {
+    "service": "orders-db",
+    "level": "ERROR",
+    "time_window": "during_incident"
+   },
+   "result": "Logs for orders-db (level=ERROR, time_window=during_incident): 6 matching\n[2026-07-05T17:03:30Z] CRITICAL: container terminated: OOMKilled (limit 1024Mi, rss 1020Mi)\n[2026-07-05T17:06:40Z] CRITICAL: container terminated: OOMKilled (limit 1024Mi, rss 1021Mi)\n[2026-07-05T17:10:08Z] ERROR: back-off restarting failed container, restart count 4\n[2026-07-05T17:13:40Z] ERROR: readiness probe failed: connection refused\n[2026-07-05T17:14:13Z] ERROR: readiness probe failed: connection refused\n[2026-07-05T17:18:49Z] ERROR: back-off restarting failed container, restart count 7"
+  },
+  {
+   "id": "E3",
+   "tool": "search_logs",
+   "args": {
+    "service": "catalog-service",
+    "level": "ERROR",
+    "time_window": "during_incident"
+   },
+   "result": "Logs for catalog-service (level=ERROR, time_window=during_incident): 2 matching\n[2026-07-05T17:04:00Z] ERROR: timeout calling orders-db after 5348ms\n[2026-07-05T17:09:37Z] ERROR: serving 5xx for 68% of requests"
+  },
+  {
+   "id": "E4",
+   "tool": "search_logs",
+   "args": {
+    "service": "auth-service",
+    "level": "ERROR",
+    "time_window": "during_incident"
+   },
+   "result": "Logs for auth-service (level=ERROR, time_window=during_incident): 2 matching\n[2026-07-05T17:04:41Z] ERROR: serving 5xx for 74% of requests\n[2026-07-05T17:07:17Z] ERROR: timeout calling catalog-service after 10476ms"
+  },
+  {
+   "id": "E5",
+   "tool": "search_logs",
+   "args": {
+    "service": "shipping-service",
+    "level": "ERROR",
+    "time_window": "during_incident"
+   },
+   "result": "Logs for shipping-service (level=ERROR, time_window=during_incident): 2 matching\n[2026-07-05T17:04:49Z] ERROR: serving 5xx for 93% of requests\n[2026-07-05T17:18:16Z] ERROR: timeout calling auth-service after 13141ms"
+  },
+  {
+   "id": "E6",
+   "tool": "get_trace",
+   "args": {
+    "trace_id": "trace-3-002"
+   },
+   "result": "Trace trace-3-002 at 2026-07-05T17:08:19Z\n  shipping-service | GET /v1/profile | 11588ms | ERROR | upstream auth-service failed\n  auth-service | GET /internal/lookup | 5893ms | ERROR | upstream catalog-service failed\n  catalog-service | GET /v1/items | 12049ms | ERROR | upstream orders-db failed\n  orders-db | GET /v1/profile | 13520ms | ERROR | connection refused"
+  }
+ ],
+ "score": 1.0
+}

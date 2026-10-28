@@ -7,8 +7,8 @@
 <meta name="description" content="Hindsight investigates a production incident from its telemetry and writes the postmortem, with every claim tied to the evidence behind it.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Martian+Mono:wdth,wght@75..112,400..700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/copilot/copilot.css?v=4">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..800;1,62..125,400..800&family=Martian+Mono:wdth,wght@75..112,400..700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/copilot/copilot.css?v=5">
 </head>
 <body>
 <header class="bar">
@@ -23,14 +23,57 @@
   </nav>
 </header>
 
-<main id="home" class="home" hidden>
-  <section class="intro">
-    <h1>The postmortem, with its <em>evidence.</em></h1>
-    <p class="lede">Hand Hindsight an incident. It reads the logs, traces, commits and config changes, names the change that started the outage, and writes the postmortem. Every claim carries a tag back to the evidence it came from.</p>
-    <div class="notice" id="notice" hidden></div>
+<main id="home" hidden>
+<div class="story" id="story">
+  <p class="story-clock" id="story-clock" aria-hidden="true"></p>
+
+  <section class="scene scene-wall" data-clock="Sun · 17:03 UTC">
+    <p class="kicker" id="wall-when">Sunday · 17:03 UTC · production</p>
+    <h1>One of today's changes <em>just broke production.</em></h1>
+    <div class="wall" id="wall" aria-label="Service status"></div>
+    <p class="wall-foot"><span id="wall-clock">17:03:00</span> <button type="button" class="ghost" id="wall-replay">Replay</button></p>
+    <p class="lede">Hindsight works out which change it was, from the logs, traces and diffs, and writes the postmortem with every claim tied to its evidence. Try finding it yourself first.</p>
+    <p class="scene-ctas"><a class="button bright" href="#game">Find the culprit</a> <a class="button ghost" href="#intake">Skip to the incidents</a></p>
   </section>
 
-  <section class="intake" aria-labelledby="intake-h">
+  <section class="scene scene-game" id="game" aria-labelledby="game-h" data-clock="Sun · 17:09 UTC">
+    <p class="kicker" id="game-kicker"></p>
+    <h2 id="game-h">One of them did this. <em>Which one?</em></h2>
+    <div class="game">
+      <div class="g-tape" id="g-tape"></div>
+      <div class="g-axis" id="g-axis" aria-hidden="true"></div>
+      <div class="g-card" id="g-card" aria-live="polite"></div>
+      <div class="g-controls">
+        <button type="button" class="ghost" id="g-prev" aria-label="Earlier change">←</button>
+        <button type="button" class="ghost" id="g-next" aria-label="Later change">→</button>
+        <button type="button" class="bright" id="g-accuse">Blame this change</button>
+        <button type="button" class="quiet" id="g-give">Show me</button>
+      </div>
+      <p class="g-verdict" id="g-verdict" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <section class="scene scene-proof" aria-labelledby="proof-h" data-clock="Sun · 17:11 UTC">
+    <p class="kicker" id="proof-kicker"></p>
+    <h2 id="proof-h">The answer, <em>with its evidence.</em></h2>
+    <div class="proof">
+      <ol class="p-chain" id="p-chain"></ol>
+      <ol class="p-exhibits" id="p-exhibits"></ol>
+    </div>
+  </section>
+
+  <section class="scene scene-morning" aria-labelledby="morning-h" data-clock="Mon · 09:30">
+    <p class="kicker">Monday · 09:30 · the postmortem review</p>
+    <h2 id="morning-h">The postmortem, <em>already written.</em></h2>
+    <article class="m-doc" id="m-doc"></article>
+    <p class="scene-ctas"><a class="button" href="#intake">Investigate an incident</a> <a class="button quiet" href="#measured">See how it's scored</a></p>
+  </section>
+</div>
+
+<div class="home">
+  <div class="notice" id="notice" hidden></div>
+
+  <section class="intake" id="intake" aria-labelledby="intake-h">
     <div class="section-head">
       <h2 id="intake-h">Open an incident</h2>
       <label class="upload">
@@ -54,6 +97,7 @@
     <p class="hint" id="history-empty">Nothing investigated yet. Open an incident above.</p>
     <ul class="runs" id="runs"></ul>
   </section>
+</div>
 </main>
 
 <main id="desk" class="desk" hidden>
@@ -126,6 +170,7 @@
   </section>
 </main>
 
-<script src="/static/copilot/copilot.js?v=4"></script>
+<script src="/static/copilot/copilot.js?v=5"></script>
+<script src="/static/copilot/story.js?v=5"></script>
 </body>
 </html>
