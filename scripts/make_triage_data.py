@@ -17,7 +17,7 @@ model can't know to do; distil from real Muse Spark runs if that shows.
 Usage:
     python scripts/make_triage_data.py --seeds 1000-1199 --out training_data/triage_sft.jsonl
 
-Keep training seeds away from the benchmark seeds (0-19).
+Keep training seeds away from the benchmark seeds (0-199, see benchmarks/).
 """
 
 from __future__ import annotations
@@ -108,8 +108,8 @@ def main() -> int:
     args = parser.parse_args()
 
     seeds = parse_seeds(args.seeds)
-    if set(seeds) & set(range(20)):
-        parser.error("seeds 0-19 are the benchmark; train on others")
+    if set(seeds) & set(range(200)):
+        parser.error("seeds 0-199 are the benchmark; train on others")
     count = 0
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
     with open(args.out, "w", encoding="utf-8") as f:
