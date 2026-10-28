@@ -36,8 +36,8 @@ vol = modal.Volume.from_name("hindsight-triage", create_if_missing=True)
 hf_cache = modal.Volume.from_name("hf-cache", create_if_missing=True)
 
 
-# BF16 weights are ~60 GB, so this needs an 80 GB card.
-@app.function(image=image, gpu="H100", scaledown_window=300, timeout=24 * 3600,
+# BF16 weights are ~60 GB, so this needs an 80 GB card; A100-80GB is cheaper than H100.
+@app.function(image=image, gpu="A100-80GB", scaledown_window=300, timeout=24 * 3600,
               volumes={"/vol": vol, "/root/.cache/huggingface": hf_cache},
               secrets=[modal.Secret.from_name("hindsight-vllm", required_keys=["VLLM_API_KEY"])])
 @modal.concurrent(max_inputs=16)
