@@ -50,7 +50,8 @@ def serve():
         "vllm", "serve", GLIMMER,
         "--served-model-name", "glimmer-base",
         "--host", "0.0.0.0", "--port", str(PORT),
-        "--max-model-len", "8192",           # triage prompts are ~3k tokens, replies <=1.5k
+        "--max-model-len", "32768",          # diagnosis reads the whole evidence ledger, plus thinking
+        "--reasoning-parser", "muse_glimmer",  # thinking goes to reasoning_content, the answer to content
         "--limit-mm-per-prompt", '{"image": 0, "video": 0}',   # text only; skips vision memory
     ]
     # Before the first training run there is no adapter; serve the base alone.

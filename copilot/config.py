@@ -54,6 +54,11 @@ class Settings:
     def model_for(self, role: str) -> str:
         return self.models[role]
 
+    @property
+    def ready(self) -> bool:
+        """Every role has a key, whether for Model API or its own server."""
+        return all(self.endpoint_for(role)[1] for role in ROLES)
+
     def endpoint_for(self, role: str) -> tuple[str, str | None]:
         """(base URL, API key) for ``role``: its override, else Model API."""
         return (self.role_base_urls.get(role, self.base_url),

@@ -173,3 +173,11 @@ def test_load_settings_reads_role_overrides(monkeypatch):
     s = load_settings()
     assert s.endpoint_for(ROLE_TRIAGE) == ("https://modal.test/v1", "k")
     assert s.endpoint_for(ROLE_REASON) == ("https://api.meta.ai/v1", "k")
+
+
+def test_ready_without_model_api_key_when_every_role_has_its_own_server():
+    own = {r: "modal-key" for r in (ROLE_TRIAGE, ROLE_REASON, "writer")}
+    base = dict(api_key=None, base_url="https://api.meta.test/v1",
+                models=dict(DEFAULT_MODELS), tavily_api_key=None)
+    assert Settings(**base, role_api_keys=own).ready
+    assert not Settings(**base, role_api_keys={ROLE_TRIAGE: "modal-key"}).ready

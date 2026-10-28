@@ -215,7 +215,7 @@ def _get(investigation_id: str) -> Investigation:
 async def status() -> dict[str, Any]:
     settings = load_settings()
     return {
-        "ready": bool(settings.api_key),
+        "ready": settings.ready,
         "research": bool(settings.tavily_api_key),
         "models": {role: settings.model_for(role) for role in ROLES},
         "recordings": sum(1 for i in store.items.values() if i.recorded),
@@ -276,7 +276,7 @@ async def start(body: StartBody) -> dict[str, str]:
         store.add(inv)
         asyncio.create_task(_run(inv, Oracle(scenario, pace=ORACLE_PACE_S)))
         return {"id": inv.id}
-    if not load_settings().api_key:
+    if not load_settings().ready:
         raise HTTPException(
             503, "This server has no MODEL_API_KEY, so it cannot run new "
                  "investigations. Recorded investigations still open.")
