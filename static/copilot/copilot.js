@@ -61,16 +61,15 @@
 
   function renderCases(incidents) {
     $("cases").innerHTML = incidents.map((inc, i) => `
-      <li><article class="case-card">
-        <div class="case-meta"><span>${esc(inc.difficulty)}</span><span>${esc(inc.services)} services</span>
+      <li class="case-row">
+        <div class="case-meta"><span class="level">${esc(inc.difficulty)}</span><span>${esc(inc.services)} services</span>
           <span>${inc.source === "seed" ? `generated, seed ${esc(inc.seed)}` : "hand-written"}</span></div>
-        <h3>${esc(inc.title)}</h3>
-        <p>${esc(inc.description)}</p>
+        <div><h3>${esc(inc.title)}</h3><p>${esc(inc.description)}</p></div>
         <div class="case-actions">
-          <button type="button" data-case="${i}" ${status.ready ? "" : "disabled"}>Investigate</button>
           <button type="button" class="quiet" data-reference="${i}">See the reference answer</button>
+          <button type="button" data-case="${i}" ${status.ready ? "" : "disabled"}>Investigate</button>
         </div>
-      </article></li>`).join("");
+      </li>`).join("");
     $("cases").onclick = (event) => {
       const button = event.target.closest("button[data-case], button[data-reference]");
       if (!button) return;
@@ -203,6 +202,7 @@
     $("window").textContent = "";
     $("graph").innerHTML = "";
     $("changes").innerHTML = "";
+    $("tape").hidden = true;
     $("exhibits").innerHTML = "";
     $("verdict").className = "pending";
     $("verdict").textContent = "The diagnosis appears here once the evidence is in.";
@@ -289,6 +289,39 @@
       <span>${esc(String(row.first_error).slice(11, 19))} UTC · ${esc(row.errors)} errors</span></li>`).join("");
 
     drawGraph(brief);
+    drawTape(changes, w, onset);
+  }
+
+  // The tape: every change before the outage on one time axis.
+  function drawTape(changes, w, onset) {
+    const t = (s) => Date.parse(s);
+    const start = t(w.start), end = t(w.end);
+    const times = changes.map((c) => t(c.when)).filter((n) => !isNaN(n));
+    if (isNaN(start) || isNaN(end) || !times.length) return;
+    const from = Math.min(...times, start), to = Math.max(end, from + 1);
+    // Culprits and decoys cluster just before the outage, so the last two
+    // hours get 60% of the width and everything earlier is compressed.
+    const split = Math.max(from, start - 2 * 36e5), cut = split > from ? 40 : 0;
+    const pos = (ms) => (ms < split
+      ? ((ms - from) / (split - from)) * cut
+      : cut + ((ms - split) / (to - split)) * (100 - cut));
+    const at = (ms) => `${pos(ms)}%`;
+    const kind = (id) => (id.startsWith("cfg") ? "cfg" : id.startsWith("infra") ? "infra" : "commit");
+    const hhmm = (ms) => new Date(ms).toISOString().slice(11, 16);
+    $("tape-track").innerHTML =
+      `<div class="tape-window" style="left:${at(start)};right:0"></div>`
+      + (cut ? `<span class="tape-break" style="left:${cut}%"></span>` : "")
+      + changes.filter((c) => !isNaN(t(c.when))).map((c) =>
+        `<span class="tick ${kind(c.id)}" data-tick="${esc(c.id)}" data-label="${esc(c.id)}"
+          style="left:${at(t(c.when))}" title="${esc(`${c.id} · ${c.where} · ${c.what}`)}"></span>`).join("")
+      + onset.filter((o) => !isNaN(t(o.first_error))).map((o) =>
+        `<span class="onset-dot" style="left:${at(t(o.first_error))}" title="${esc(`${o.service} first error`)}"></span>`).join("");
+    const hours = Math.round((start - from) / 36e5);
+    $("tape-span").textContent = `${changes.length} changes in the ${hours} h before the outage`;
+    $("tape-axis").innerHTML = `<span>${hhmm(from)} UTC</span>`
+      + (cut ? `<span class="tape-mid" style="left:${cut}%">${hhmm(split)} · last 2 h</span>` : "")
+      + `<span>outage ${hhmm(start)}–${hhmm(end)}</span>`;
+    $("tape").hidden = false;
   }
 
   const WORKING = {
@@ -374,6 +407,8 @@
         row.classList.add("culprit");
         row.parentElement.scrollTop = row.offsetTop - row.parentElement.offsetTop - 60;
       }
+      const tick = document.querySelector(`[data-tick="${CSS.escape(id)}"]`);
+      if (tick) tick.classList.add("culprit", ...(parseFloat(tick.style.left) > 70 ? ["flip"] : []));
       return `<p class="cause-id">${esc(id)}</p><p class="cause-what">${esc(e.what || "")}${e.where ? ` · ${esc(e.where)}` : ""}</p>`;
     }).join("");
     const pct = Math.round(d.confidence * 100);

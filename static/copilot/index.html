@@ -7,8 +7,8 @@
 <meta name="description" content="Hindsight investigates a production incident from its telemetry and writes the postmortem, with every claim tied to the evidence behind it.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/copilot/copilot.css">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Martian+Mono:wdth,wght@75..112,400..700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/copilot/copilot.css?v=4">
 </head>
 <body>
 <header class="bar">
@@ -25,8 +25,8 @@
 
 <main id="home" class="home" hidden>
   <section class="intro">
-    <h1>The postmortem,<br>with its evidence.</h1>
-    <p class="lede">Hand Hindsight an incident. It reads the logs, traces, commits and config changes, names what started the outage, and writes the postmortem. Every claim carries a tag back to the evidence it came from.</p>
+    <h1>The postmortem, with its <em>evidence.</em></h1>
+    <p class="lede">Hand Hindsight an incident. It reads the logs, traces, commits and config changes, names the change that started the outage, and writes the postmortem. Every claim carries a tag back to the evidence it came from.</p>
     <div class="notice" id="notice" hidden></div>
   </section>
 
@@ -76,6 +76,13 @@
   </div>
   <div class="notice" id="desk-notice" hidden></div>
 
+  <section class="tape" id="tape" aria-labelledby="tape-h" hidden>
+    <div class="tape-head"><h3 id="tape-h">Changes before the outage, in time</h3><span id="tape-span"></span></div>
+    <div class="tape-track" id="tape-track" aria-hidden="true"></div>
+    <div class="tape-axis" id="tape-axis" aria-hidden="true"></div>
+    <p class="tape-key" aria-hidden="true"><span><i></i>commit</span><span><i class="k-cfg"></i>config change</span><span><i class="k-infra"></i>infrastructure event</span><span><i class="k-win"></i>outage</span><span><i class="k-onset"></i>first error on a service</span></p>
+  </section>
+
   <div class="columns">
     <section class="col case" aria-labelledby="case-h">
       <h2 id="case-h">Incident</h2>
@@ -119,6 +126,6 @@
   </section>
 </main>
 
-<script src="/static/copilot/copilot.js"></script>
+<script src="/static/copilot/copilot.js?v=4"></script>
 </body>
 </html>
